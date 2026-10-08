@@ -152,7 +152,7 @@ function updLog(){const hi=view===null?events.length:bsT(view);let h='';for(let 
 $('log').onclick=e=>{const d=e.target.closest('.ev');if(!d||d.dataset.i===undefined)return;const v=events[+d.dataset.i],mx=(v.pa.x+v.pb.x)/2,mz=(v.pa.z+v.pb.z)/2;
  $('evd').innerHTML=`<b>COMMUNICATION #${+d.dataset.i+1}</b><br>t ${v.t.toFixed(2)} s · #${v.a} ↔ #${v.b}<br>A ${v.pa.x}, ${v.pa.y}, ${v.pa.z}<br>B ${v.pb.x}, ${v.pb.y}, ${v.pb.z}<br>dist ${v.d.toFixed(2)} · ${v.type}<br>knowledge ${v.ka.toFixed(0)}% / ${v.kb.toFixed(0)}%`;
  C.tx=mx;C.tz=mz;C.dist=Math.min(C.dist,16);marker.position.set(mx,.8,mz);marker.visible=true;markT=performance.now()+4000};
-const dl_=(name,blob)=>{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1e3)},ds=()=>new Date().toISOString().slice(0,10);
+const dl_=async(name,blob)=>{try{const d=window.claude&&await window.claude.use('downloads');if(d){await d.save({filename:name,data:blob});return}}catch(x){if(x&&x.code==='declined')return}const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1e3)},ds=()=>new Date().toISOString().slice(0,10);
 $('exp').onclick=()=>dl_(`bee-swarm-experiment-${ds()}.json`,new Blob([JSON.stringify({format:'honey-harness-1',seed,size:P.size,params:P,simTime:T,beeCount:bees.length,firstExit,lastExit,propagation:firstExit===null?null:lastExit-firstExit,exitFoundBy:finder,discoveredPct:discN/N*100,
  bees:bees.map(b=>({id:b.id,comm:b.comm,ownN:b.ownN,knowN:b.knowN,uniq:b.uniq,exitKnown:b.exitKnown,exitTime:b.exitT,x:+b.x.toFixed(2),z:+b.z.toFixed(2),cells:[...b.own.keys()].filter(c=>b.own[c])})),
  pairs:[...pairs].map(([k,c])=>[k>>10,k&1023,c]),events:events.map(e=>({t:+e.t.toFixed(3),a:e.a,b:e.b,pa:e.pa,pb:e.pb,type:e.type,d:+e.d.toFixed(3),ka:+e.ka.toFixed(1),kb:+e.kb.toFixed(1)}))})]));
@@ -266,9 +266,28 @@ function showResults(){const S=getS(),n=bees.length,dp=discN/N*100,ne=events.len
  +'<h3>Communication</h3>'+rw('Total communications',ne.toLocaleString())+rw('Average per bee',(2*ne/n).toFixed(1))+rw('Average per second',(ne/Math.max(T,1)).toFixed(1))+rw('Most communicative bee','#'+mc.id+' ('+mc.comm+')')+rw('Most connected bee','#'+S.tb+' ('+S.deg[S.tb]+' links)')+rw('Most active link',S.lc?`#${S.lk>>10} ↔ #${S.lk&1023} (${S.lc})`:'—')+rw('Distinct links',S.ln)
  +'<h3>How the route spread</h3><canvas id="rch" width="520" height="110" style="width:100%"></canvas>'+kn.slice(0,12).map((b,i)=>`<div class="r"><span>${i+1}. Bee #${b.id}</span><b>${b.learnT.toFixed(1)} s ${b.learnFrom<0?'(found it)':'← #'+b.learnFrom}</b></div>`).join('')
  +'<h3>Settings used</h3>'+rw('Simulated time',T.toFixed(1)+' s')+rw('Bees / maze',n+' / '+P.size+'×'+P.size)+rw('Comm radius · speed',P.radius+' · '+P.speed)+rw('Randomness · memory · sharing',P.rand+' · '+P.mem+' · '+P.share)+rw('Maze seed',seed)
- +'<p><small>No single bee holds the whole solution: the route reached the swarm only through local contacts.</small></p><div class="row"><button onclick="$(\'exp\').click()">Download data</button><button onclick="setMap(true);$(\'w-res\').classList.add(\'hid\')">Show 3D connection map</button></div>';
+ +'<p><small>No single bee holds the whole solution: the route reached the swarm only through local contacts.</small></p><div class="row"><button onclick="$(\'exp\').click()">Download data (.json)</button><button onclick="downloadTxt()">Download results (.txt)</button><button onclick="setMap(true);$(\'w-res\').classList.add(\'hid\')">Show 3D connection map</button></div>';
  $('w-res').classList.remove('hid');$('w-res').style.zIndex=++zt;
  const c=$('rch').getContext('2d'),t0=firstExit===null?0:firstExit,t1=Math.max(kn.length?kn[kn.length-1].learnT:1,t0+1);
  c.fillStyle='#130e06';c.fillRect(0,0,520,110);c.strokeStyle='#ffb81c';c.lineWidth=2;c.beginPath();c.moveTo(0,105);
  kn.forEach((b,i)=>c.lineTo((b.learnT-t0)/(t1-t0)*510+5,105-(i+1)/n*95));c.stroke();c.fillStyle='#a8946a';c.font='10px sans-serif';c.fillText('bees knowing the route over time (0–'+(t1-t0).toFixed(1)+' s after first exit)',6,12)}
 $('rpt').onclick=showResults;
+
+/* text report */
+function txtReport(){const S=getS(),n=bees.length,L=[],t2=x=>x===null||x===undefined?'n/a':x.toFixed(2)+' s',pc=x=>x.toFixed(1)+'%';
+ L.push('HONEY TRAP - SIMULATION REPORT','Generated '+new Date().toISOString(),'');
+ L.push('SETTINGS','  maze seed: '+seed,'  maze size: '+P.size+' x '+P.size,'  bees: '+n,'  bee speed: '+P.speed,'  communication radius: '+P.radius,'  exploration randomness: '+P.rand,'  memory strength: '+P.mem,'  information sharing: '+P.share,'  simulated time: '+T.toFixed(2)+' s','  status: '+(done?'complete (every bee reached the exit)':'incomplete'),'');
+ L.push('EXIT','  found by: '+(finder<0?'n/a':'bee #'+finder),'  first exit: '+t2(firstExit),'  last exit: '+t2(lastExit),'  exit propagation time: '+(firstExit===null?'n/a':t2(lastExit-firstExit)),
+  '  bees that reached the exit: '+exited+' / '+n,'  bees knowing the route: '+bees.filter(b=>b.exitKnown).length+' / '+n,'');
+ L.push('EXPLORATION','  maze discovered: '+(discN/N*100).toFixed(2)+'% ('+discN+' / '+N+' cells)','');
+ L.push('COMMUNICATION','  total communications: '+events.length,'  average per bee: '+(2*events.length/n).toFixed(2),'  distinct links: '+S.ln,'  most connected bee: #'+S.tb+' ('+S.deg[S.tb]+' links)',
+  '  most active link: '+(S.lc?'#'+(S.lk>>10)+' <-> #'+(S.lk&1023)+' ('+S.lc+' communications)':'n/a'),'');
+ L.push('BEES (id | communications | cells discovered | unique discoveries | cells known | knows route | reached exit | learned route at)');
+ for(const b of bees)L.push(`  #${b.id} | ${b.comm} | ${b.ownN} (${pc(b.ownN/N*100)}) | ${b.uniq} | ${b.knowN} (${pc(b.knowN/N*100)}) | ${b.exitKnown?'yes':'no'} | ${b.hasExited?t2(b.exitT):'no'} | ${b.learnT===undefined?'n/a':t2(b.learnT)+(b.learnFrom<0?' (found it)':' from #'+b.learnFrom)}`);
+ L.push('','LINKS (pair | communications)');
+ for(const[k,c]of[...net().pairs].sort((a,b)=>b[1]-a[1]))L.push(`  #${k>>10} <-> #${k&1023} | ${c}`);
+ L.push('','COMMUNICATION EVENTS (no | time | bees | type | distance | position A x,y,z | position B x,y,z | knowledge A / B)');
+ events.forEach((e,i)=>L.push(`  ${i+1} | ${e.t.toFixed(2)} s | #${e.a} <-> #${e.b} | ${e.type} | ${e.d.toFixed(2)} | ${e.pa.x}, ${e.pa.y}, ${e.pa.z} | ${e.pb.x}, ${e.pb.y}, ${e.pb.z} | ${pc(e.ka)} / ${pc(e.kb)}`));
+ return L.join('\n')}
+function downloadTxt(){dl_(`honey-trap-results-${ds()}.txt`,new Blob([txtReport()],{type:'text/plain'}))}
+$('ext').onclick=downloadTxt;

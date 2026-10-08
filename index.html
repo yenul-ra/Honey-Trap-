@@ -16,7 +16,7 @@
 <h3>Experiments</h3><button id="pA">A · 10 bees, small</button> <button id="pB">B · 100, medium</button> <button id="pC">C · 100, large</button>
 <h3>Parameters</h3><div id="ctl"></div>
 <div class="r"><span>Performance</span><select id="pf"><option value="0">Low<option value="1">Medium<option value="2">High<option value="3" selected>Ultra</select></div>
-<h3>Data</h3><button id="exp">Download simulation data</button> <button id="ep">Map PNG</button> <button id="ej">Map JSON</button>
+<h3>Data</h3><button id="exp">Download simulation data</button> <button id="ext">Data as .txt</button> <button id="ep">Map PNG</button> <button id="ej">Map JSON</button>
 <label>Import experiment <input type="file" id="imp" accept=".json,application/json"></label><button id="hp">Toggle perf monitor</button>
 <details><summary>What am I seeing?</summary><p>Every bee has limited, private knowledge. Bees only exchange information with bees inside their communication radius. When they meet, they swap which cells have been explored, which are dead ends, and (if known) the exit route. Nothing is broadcast globally and no shortest path is computed for the swarm.</p>
 <p><b style="color:#ff5b5b">Red line</b> = communication; thicker = more contacts. <b style="color:#ff9a2a">Orange</b> = new-area info, <b style="color:#35ff6a">green</b> = exit info. Amber floor = explored by at least one bee. Blue floor (Selected bee) = what that bee knows. The 3D mind map shows who talks to whom: click a node to focus a bee, click a line to read every communication between that pair.</p></details></div></section>
@@ -25,4 +25,6 @@
 <section class="win hid" id="w-res" style="left:calc(50% - 280px);top:7vh;width:560px;height:80vh"><div class="wt"><span>Results</span><button class="x">✕</button></div><div class="wb"><div id="res"></div></div></section>
 <section class="win hid" id="w-link" style="right:320px;top:14px;width:360px;height:60vh"><div class="wt"><span>Link communications</span><button class="x">✕</button></div><div class="wb"><div id="lk"></div></div></section>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="app.js"></script></body></html>
+<script src="app.js"></script>
+<script src="stress-mode.js"></script>
+<script src="notion-pointer.js"></script></body></html>
