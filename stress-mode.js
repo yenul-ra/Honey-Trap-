@@ -6,7 +6,7 @@
 const S=window.STRESS={on:false,count:0,log:[]},rings=[];let ri=0,lastR=0;
 const dock=document.getElementById('dock');
 let box=document.getElementById('plug');
-if(!box){box=document.createElement('div');box.id='plug';box.className='dg';box.innerHTML='<h4>Experimental features</h4>';dock.insertBefore(box,dock.lastElementChild)}
+if(!box){box=document.createElement('div');box.id='plug';box.style.cssText='position:absolute;left:12px;bottom:12px;z-index:6;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px;box-shadow:var(--sh)';box.innerHTML='<div style="font-size:12px;color:var(--m);margin-bottom:2px">Experimental features</div>';document.getElementById('view').appendChild(box)}
 box.insertAdjacentHTML('beforeend','<label title="New discoveries are broadcast to every bee"><input type="checkbox" id="stressOn"> ⚡ Stress mode <small>(shockwave)</small></label>');
 document.getElementById('stressOn').onchange=e=>{S.on=e.target.checked};
 function attach(){const grp=new THREE.Group();rings.length=0;

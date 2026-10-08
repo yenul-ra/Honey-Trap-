@@ -8,7 +8,7 @@
 const NP=window.NPTR={on:false,placed:0,reads:0,marks:0,ptr:null,avoid:null};let arr,mk;
 const dock=document.getElementById('dock');
 let box=document.getElementById('plug');
-if(!box){box=document.createElement('div');box.id='plug';box.className='dg';box.innerHTML='<h4>Experimental features</h4>';dock.insertBefore(box,dock.lastElementChild)}
+if(!box){box=document.createElement('div');box.id='plug';box.style.cssText='position:absolute;left:12px;bottom:12px;z-index:6;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px;box-shadow:var(--sh)';box.innerHTML='<div style="font-size:12px;color:var(--m);margin-bottom:2px">Experimental features</div>';document.getElementById('view').appendChild(box)}
 box.insertAdjacentHTML('beforeend','<label title="Bees leave arrows toward the exit and marks on dead ends"><input type="checkbox" id="nptrOn"> 📌 Notion Pointer <small>(signposts)</small></label>');
 document.getElementById('nptrOn').onchange=e=>{NP.on=e.target.checked};
 function reset(){NP.ptr=new Int32Array(N).fill(-1);NP.avoid=new Uint8Array(N);NP.placed=NP.reads=NP.marks=0}
